@@ -9,9 +9,9 @@ const checkController = {
 
     if (isValid) {
       checkRepository
-        .saveLog("path_check", true)
+        .saveLog(req.path, true)
         .then(() => {
-          return checkRepository.updateStatusByUrlPath("path_check", true);
+          return checkRepository.updateStatusByUrlPath(req.path, true);
         })
         .then(() =>
           res.json({
@@ -22,9 +22,9 @@ const checkController = {
         .catch((error) => res.status(500).json({ error: error.message }));
     } else {
       checkRepository
-        .saveLog("path_check", false)
+        .saveLog(req.path, false)
         .then(() => {
-          return checkRepository.updateStatusByUrlPath("path_check", false);
+          return checkRepository.updateStatusByUrlPath(req.path, false);
         })
         .then(() =>
           res.status(400).json({ status: false, error: "Data tidak valid." })

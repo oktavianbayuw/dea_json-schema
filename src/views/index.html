@@ -1,19 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSON Validation</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>JSON Validator Engine</h1>
     <p>Masukkan JSON Response Anda !</p>
-    <form action="/merchant/validateAndSave" method="POST">
-        <textarea name="jsonData" id="jsonData" rows="10" cols="100" placeholder="Masukkan JSON string"></textarea>
-        <br>
-        <button style="margin: 20px; padding: 10px;" type="submit">Validate JSON</button>
-        <button style="margin: 20px; padding: 10px;" type="button">CLEAR</button>
-        <br>
+    <form action="/validateAndSave" method="POST" id="jsonForm">
+      <textarea
+        name="jsonData"
+        id="jsonData"
+        rows="10"
+        cols="100"
+        placeholder="Masukkan JSON string"
+      ></textarea>
+      <br />
+      <button style="margin: 20px; padding: 10px" type="submit">
+        Validate JSON
+      </button>
+      <button
+        style="margin: 20px; padding: 10px"
+        type="button"
+        onclick="clearForm()"
+      >
+        CLEAR
+      </button>
+      <br />
     </form>
-</body>
+
+    <div id="resultContainer">
+      <h2>Hasil Respons:</h2>
+      <pre id="result"></pre>
+    </div>
+  </body>
 </html>
+
+<!-- ... (bagian lain dari HTML) ... -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const jsonForm = document.getElementById("jsonForm");
+    const resultContainer = document.getElementById("resultContainer");
+    const resultElement = document.getElementById("result");
+
+    jsonForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const formData = new FormData(jsonForm);
+      const jsonData = formData.get("jsonData");
+
+      const response = await fetch("/merchant/validateAndSave", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jsonData }),
+      });
+
+      const result = await response.json();
+
+      resultElement.innerText = JSON.stringify(result, null, 2);
+      resultContainer.style.display = "block";
+    });
+
+    window.clearForm = function () {
+      resultElement.innerText = "";
+      resultContainer.style.display = "none";
+
+      document.getElementById("jsonData").value = "";
+    };
+  });
+</script>
