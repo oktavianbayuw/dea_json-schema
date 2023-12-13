@@ -16,7 +16,7 @@ const checkController = {
         .then(() =>
           res.json({
             status: true,
-            message: "Data berhasil disimpan dan status diperbarui.",
+            message: "Data Valid.",
           })
         )
         .catch((error) => res.status(500).json({ error: error.message }));

@@ -62,6 +62,14 @@
       const result = await response.json();
 
       resultElement.innerText = JSON.stringify(result, null, 2);
+      if (result.error) {
+        resultElement.style.background = "red";
+        resultElement.style.color = "white";
+      } else {
+        resultElement.style.background = "green";
+        resultElement.style.color = "white";
+      }
+
       resultContainer.style.display = "block";
     });
 
