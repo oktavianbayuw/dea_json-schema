@@ -30,7 +30,12 @@
     <h1>JSON Validator Engine</h1>
     <div style="display: flex">
       <!-- Formulir JSON -->
-      <form action="/validateAndSave" method="POST" id="jsonForm">
+      <form
+        action="/validateAndSave"
+        method="POST"
+        id="jsonForm"
+        style="margin-left: 10px"
+      >
         <textarea
           name="jsonData"
           id="jsonData"
@@ -57,9 +62,9 @@
       </form>
 
       <!-- Container untuk menampilkan JSON schema -->
-      <div id="schemaContainer">
-        <h2>JSON Schema:</h2>
-        <pre id="schema"></pre>
+      <div id="schemaContainer" style="margin-left: 10px; width: 600px">
+        <h2>Available JSON Schema:</h2>
+        <pre id="schema" style="width: 100px"></pre>
       </div>
     </div>
 
