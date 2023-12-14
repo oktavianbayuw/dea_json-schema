@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSON Validation</title>
+    <style>
+      /* Tambahkan gaya CSS untuk mengatur warna latar belakang */
+      #resultContainer {
+        padding: 10px;
+      }
+      .success {
+        background-color: green;
+        color: white;
+      }
+      .error {
+        background-color: red;
+        color: white;
+      }
+    </style>
   </head>
   <body>
     <h1>JSON Validator Engine</h1>
@@ -39,45 +53,43 @@
       <pre id="result"></pre>
     </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const jsonForm = document.getElementById("jsonForm");
-    const resultContainer = document.getElementById("resultContainer");
-    const resultElement = document.getElementById("result");
+    <script>
+      async function validateJSON() {
+        const jsonData = document.getElementById("jsonData").value;
 
-    jsonForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
+        try {
+          const response = await fetch("/merchant/validateAndSave", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: jsonData,
+          });
 
-      const formData = new FormData(jsonForm);
-      const jsonData = formData.get("jsonData");
+          const result = await response.json();
 
-      const response = await fetch("/merchant/validateAndSave", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ jsonData }),
-      });
+          const resultContainer = document.getElementById("result");
+          resultContainer.textContent = JSON.stringify(result, null, 2);
 
-      const result = await response.json();
-
-      resultElement.innerText = JSON.stringify(result, null, 2);
-      if (result.error) {
-        resultElement.style.background = "red";
-        resultElement.style.color = "white";
-      } else {
-        resultElement.style.background = "green";
-        resultElement.style.color = "white";
+          // Tambahkan logika untuk mengubah warna latar belakang
+          if (result.status === true) {
+            resultContainer.className = "success";
+          } else {
+            resultContainer.className = "error";
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
       }
 
-      resultContainer.style.display = "block";
-    });
+      function clearForm() {
+        const jsonDataInput = document.getElementById("jsonData");
+        const resultContainer = document.getElementById("result");
 
-    window.clearForm = function () {
-      resultElement.innerText = "";
-      resultContainer.style.display = "none";
-
-      document.getElementById("jsonData").value = "";
-    };
-  });
-</script>
+        jsonDataInput.value = "";
+        resultContainer.textContent = "";
+        resultContainer.className = ""; // Hapus kelas background
+      }
+    </script>
+  </body>
+</html>
