@@ -17,7 +17,11 @@
         placeholder="Masukkan JSON string"
       ></textarea>
       <br />
-      <button style="margin: 20px; padding: 10px" type="submit">
+      <button
+        style="margin: 20px; padding: 10px"
+        type="button"
+        onclick="validateJSON()"
+      >
         Validate JSON
       </button>
       <button
@@ -34,50 +38,36 @@
       <h2>Hasil Respons:</h2>
       <pre id="result"></pre>
     </div>
-  </body>
-</html>
 
-<!-- ... (bagian lain dari HTML) ... -->
+    <script>
+      async function validateJSON() {
+        const jsonData = document.getElementById("jsonData").value;
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const jsonForm = document.getElementById("jsonForm");
-    const resultContainer = document.getElementById("resultContainer");
-    const resultElement = document.getElementById("result");
+        try {
+          const response = await fetch("/merchant/validateAndSave", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: jsonData,
+          });
 
-    jsonForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
+          const result = await response.json();
 
-      const formData = new FormData(jsonForm);
-      const jsonData = formData.get("jsonData");
-
-      const response = await fetch("/merchant/validateAndSave", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ jsonData }),
-      });
-
-      const result = await response.json();
-
-      resultElement.innerText = JSON.stringify(result, null, 2);
-      if (result.error) {
-        resultElement.style.background = "red";
-        resultElement.style.color = "white";
-      } else {
-        resultElement.style.background = "green";
-        resultElement.style.color = "white";
+          document.getElementById("result").textContent = JSON.stringify(
+            result,
+            null,
+            2
+          );
+        } catch (error) {
+          console.error("Error:", error);
+        }
       }
 
-      resultContainer.style.display = "block";
-    });
-
-    window.clearForm = function () {
-      resultElement.innerText = "";
-      resultContainer.style.display = "none";
-
-      document.getElementById("jsonData").value = "";
-    };
-  });
-</script>
+      function clearForm() {
+        document.getElementById("jsonData").value = "";
+        document.getElementById("result").textContent = "";
+      }
+    </script>
+  </body>
+</html>
