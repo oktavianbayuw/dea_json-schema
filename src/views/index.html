@@ -6,7 +6,15 @@
     <title>JSON Validation</title>
     <style>
       /* Tambahkan gaya CSS untuk mengatur warna latar belakang */
-      #resultContainer {
+      #container {
+        display: flex;
+      }
+      #leftContainer {
+        flex: 1;
+        padding: 10px;
+      }
+      #rightContainer {
+        flex: 1;
         padding: 10px;
       }
       .success {
@@ -21,59 +29,61 @@
       #schemaContainer {
         padding: 10px;
         border: 1px solid #ccc;
-        max-width: 400px;
+        max-width: 600px;
         overflow: auto;
+        margin-top: 20px; /* Beri margin atas untuk memisahkan dari formulir */
       }
     </style>
   </head>
   <body>
     <h1>JSON Validator Engine</h1>
-    <div style="display: flex">
+    <div id="container">
       <!-- Formulir JSON -->
-      <form
-        action="/validateAndSave"
-        method="POST"
-        id="jsonForm"
-        style="margin-left: 10px"
-      >
-        <textarea
-          name="jsonData"
-          id="jsonData"
-          rows="10"
-          cols="50"
-          placeholder="Masukkan JSON string"
-        ></textarea>
-        <br />
-        <button
-          style="margin: 20px; padding: 10px"
-          type="button"
-          onclick="validateJSON()"
-        >
-          Validate JSON
-        </button>
-        <button
-          style="margin: 20px; padding: 10px"
-          type="button"
-          onclick="clearForm()"
-        >
-          CLEAR
-        </button>
-        <br />
-      </form>
+      <div id="leftContainer">
+        <form action="/validateAndSave" method="POST" id="jsonForm">
+          <textarea
+            name="jsonData"
+            id="jsonData"
+            rows="10"
+            cols="50"
+            placeholder="Masukkan JSON string"
+            style="width: 400px"
+          ></textarea>
+          <br />
+          <button
+            style="margin: 20px; padding: 10px"
+            type="button"
+            onclick="validateJSON()"
+          >
+            Validate JSON
+          </button>
+          <button
+            style="margin: 20px; padding: 10px"
+            type="button"
+            onclick="clearForm()"
+          >
+            CLEAR
+          </button>
+        </form>
 
-      <!-- Container untuk menampilkan JSON schema -->
-      <div id="schemaContainer" style="margin-left: 10px; width: 600px">
-        <h2>Available JSON Schema:</h2>
-        <pre id="schema" style="width: 100px"></pre>
+        <!-- Container untuk menampilkan JSON schema -->
+        <div id="schemaContainer">
+          <h2>JSON Schema yang Tersedia Di Simulasi Ini :</h2>
+          <pre id="schema"></pre>
+        </div>
+      </div>
+
+      <!-- Container untuk menampilkan hasil respons -->
+      <div id="rightContainer">
+        <div id="resultContainer">
+          <h2>Hasil Respons:</h2>
+          <pre id="result"></pre>
+        </div>
       </div>
     </div>
 
-    <div id="resultContainer">
-      <h2>Hasil Respons:</h2>
-      <pre id="result"></pre>
-    </div>
-
     <script>
+      // JSON schema yang akan ditampilkan
       const jsonSchema = {
         type: "object",
         properties: {
@@ -125,6 +135,8 @@
 
       // Panggil fungsi untuk menampilkan JSON schema saat halaman dimuat
       window.onload = displaySchema;
+
+      // ... (sisa kode JavaScript Anda)
       async function validateJSON() {
         const jsonData = document.getElementById("jsonData").value;
 
