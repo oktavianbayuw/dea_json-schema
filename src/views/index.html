@@ -50,17 +50,18 @@
 
       const formData = new FormData(jsonForm);
       const jsonData = formData.get("jsonData");
-
+      
       const response = await fetch("/merchant/validateAndSave", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ jsonData }),
+        body: jsonData,
       });
 
       const result = await response.json();
-
+      const responseData = result.data;
+      
       resultElement.innerText = JSON.stringify(result, null, 2);
       if (result.error) {
         resultElement.style.background = "red";
