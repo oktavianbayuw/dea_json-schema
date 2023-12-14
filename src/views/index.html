@@ -54,16 +54,6 @@
           <label>Path : </label>
           <input class="input-path" type="text" name="path" id="path" placeholder="Masukkan path json anda!">
           <br>
-          <label>JSON Schema :</label>
-          <textarea 
-            name="jsonSchema"
-            id="jsonSchema"
-            value="jsonSchema"
-            rows="8"
-            cols="75"
-            placeholder="Masukkan JSON Schema"
-            ></textarea>
-            <br>
             <label>JSON Response :</label>
           <textarea
             name="jsonData"
@@ -90,7 +80,7 @@
           <button
           style="margin: 20px; padding: 10px"
           type="button"
-          onclick="inputAndDisplaySchema()"
+          onclick="convertToSchema()"
         >
           Input and Display Schema
         </button>
@@ -113,22 +103,56 @@
     </div>
 
     <script>
+      
       // JSON schema yang akan ditampilkan
       const jsonSchema = document.getElementById("jsonSchema");
+      function convertToSchema(jsonObject, parentKey = "") {
+        const result = {
+          type: "object",
+          properties: {},
+          required: [],
+        };
+
+        for (const key in jsonObject) {
+          const fullPath = parentKey ? `${parentKey}.${key}` : key;
+
+          if (jsonObject[key] && typeof jsonObject[key] === "object" && !Array.isArray(jsonObject[key])) {
+            // Recursive call for nested objects
+            result.properties[key] = convertToSchema(jsonObject[key], fullPath);
+            if (result.properties[key].required && result.properties[key].required.length > 0) {
+              result.required.push(key);
+            }
+          } else {
+            // Handle primitive types
+            result.properties[key] = { type: typeof jsonObject[key] };
+            if (jsonObject[key] !== null) {
+              result.required.push(key);
+            }
+          }
+        }
+
+        return result;
+        console.log(result);
+      }
 
       function inputAndDisplaySchema() {
-      // JSON schema yang akan ditampilkan
-      const jsonSchema = document.getElementById("jsonSchema").value
+        // Ambil nilai JSON Response dari textarea
+        const jsonResponseInput = document.getElementById("jsonData").value;
 
-      // Ambil elemen textarea yang berkorespondensi dengan JSON Schema di formulir
-      const jsonSchemaInput = document.getElementById("jsonSchema");
+        try {
+          // Parse JSON Response menjadi objek JavaScript
+          const jsonObject = JSON.parse(jsonResponseInput);
 
-      // Tetapkan nilai JSON Schema ke textarea
-      jsonSchemaInput.value = jsonSchema;
+          // Konversi objek JSON menjadi JSON Schema
+          const jsonSchema = convertToSchema(jsonObject);
 
-      // Jalankan fungsi yang menangani tampilan JSON Schema di container (jika perlu)
-      displaySchema();
-    }
+          // Tampilkan JSON Schema di dalam elemen <pre>
+          const jsonSchemaContainer = document.getElementById("schema");
+          jsonSchemaContainer.textContent = JSON.stringify(jsonSchema, null, 2);
+        } catch (error) {
+          console.error("Error parsing JSON response:", error);
+        }
+      }
 
     // Fungsi untuk menampilkan JSON schema di halaman
     function displaySchema() {
@@ -166,7 +190,6 @@
           } else {
             resultContainer.className = "error";
           }
-
           // Menampilkan JSON schema
           const schemaContainer = document.getElementById("schema");
           schemaContainer.textContent = JSON.stringify(schemaMerchant, null, 2);
@@ -174,7 +197,6 @@
           console.error("Error:", error);
         }
       }
-
       function clearForm() {
         const pathInput = document.getElementById("path");
         const jsonDataInput = document.getElementById("jsonData");
