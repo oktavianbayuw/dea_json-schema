@@ -17,7 +17,11 @@
         placeholder="Masukkan JSON string"
       ></textarea>
       <br />
-      <button style="margin: 20px; padding: 10px" type="submit">
+      <button
+        style="margin: 20px; padding: 10px"
+        type="button"
+        onclick="validateJSON()"
+      >
         Validate JSON
       </button>
       <button
@@ -34,10 +38,6 @@
       <h2>Hasil Respons:</h2>
       <pre id="result"></pre>
     </div>
-  </body>
-</html>
-
-<!-- ... (bagian lain dari HTML) ... -->
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -50,18 +50,17 @@
 
       const formData = new FormData(jsonForm);
       const jsonData = formData.get("jsonData");
-      
+
       const response = await fetch("/merchant/validateAndSave", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: jsonData,
+        body: JSON.stringify({ jsonData }),
       });
 
       const result = await response.json();
-      const responseData = result.data;
-      
+
       resultElement.innerText = JSON.stringify(result, null, 2);
       if (result.error) {
         resultElement.style.background = "red";
