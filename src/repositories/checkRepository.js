@@ -18,14 +18,33 @@ const checkRepository = {
 
   updateStatusByUrlPath: (urlPath, newStatus) => {
     return new Promise((resolve, reject) => {
-      const query =
-        "UPDATE results SET status = ?, dt_modified = NOW() WHERE url_path = ?";
+      const dbStatus = newStatus ? 1 : 0;
 
-      db.query(query, [newStatus, urlPath], (error, results) => {
-        if (error) {
-          reject(error);
+      const selectQuery = "SELECT * FROM results WHERE url_path = ?";
+      db.query(selectQuery, [urlPath], (selectError, selectResults) => {
+        if (selectError) {
+          reject(selectError);
         } else {
-          resolve(results);
+          if (selectResults.length > 0) {
+            const updateQuery =
+              "UPDATE results SET status = ?, dt_modified = NOW() WHERE url_path = ?";
+            db.query(
+              updateQuery,
+              [dbStatus, urlPath],
+              (updateError, updateResults) => {
+                if (updateError) {
+                  reject(updateError);
+                } else {
+                  resolve(updateResults);
+                }
+              }
+            );
+          } else {
+            checkRepository
+              .saveLog(urlPath, newStatus)
+              .then(resolve)
+              .catch(reject);
+          }
         }
       });
     });
