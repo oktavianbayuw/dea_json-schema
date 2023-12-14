@@ -1,30 +1,51 @@
 const Ajv = require("ajv");
 
 const schemaMerchant = {
-  type: "object",
-  properties: {
-    responseCode: { type: "string" },
-    responseMessage: { type: "string" },
-    referenceNo: { type: "string" },
-    partnerReferenceNo: { type: "string" },
-    additionalInfo: {
-      type: "object",
-      properties: {
-        amount: { type: "string" },
-        currency: { type: "string" },
-        merchantTrxId: { type: "string" },
-        remarks: { type: "string" },
-      },
-      required: ["amount", "currency", "merchantTrxId", "remarks"],
+  "type": "object",
+  "properties": {
+    "responseCode": {
+      "type": "string"
     },
+    "responseMessage": {
+      "type": "string"
+    },
+    "referenceNo": {
+      "type": "string"
+    },
+    "partnerReferenceNo": {
+      "type": "string"
+    },
+    "additionalInfo": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "merchantTrxId": {
+          "type": "string"
+        },
+        "remarks": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "currency",
+        "merchantTrxId",
+        "remarks"
+      ]
+    }
   },
-  required: [
+  "required": [
     "responseCode",
     "responseMessage",
     "referenceNo",
     "partnerReferenceNo",
-    "additionalInfo",
-  ],
+    "additionalInfo"
+  ]
 };
 
 const ajv = new Ajv({ allErrors: true });
