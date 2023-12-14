@@ -17,36 +17,51 @@
         background-color: red;
         color: white;
       }
+      /* Tambahkan gaya CSS untuk menampilkan JSON schema */
+      #schemaContainer {
+        padding: 10px;
+        border: 1px solid #ccc;
+        max-width: 400px;
+        overflow: auto;
+      }
     </style>
   </head>
   <body>
     <h1>JSON Validator Engine</h1>
-    <p>Masukkan JSON Response Anda !</p>
-    <form action="/validateAndSave" method="POST" id="jsonForm">
-      <textarea
-        name="jsonData"
-        id="jsonData"
-        rows="10"
-        cols="100"
-        placeholder="Masukkan JSON string"
-      ></textarea>
-      <br />
-      <button
-        style="margin: 20px; padding: 10px"
-        type="button"
-        onclick="validateJSON()"
-      >
-        Validate JSON
-      </button>
-      <button
-        style="margin: 20px; padding: 10px"
-        type="button"
-        onclick="clearForm()"
-      >
-        CLEAR
-      </button>
-      <br />
-    </form>
+    <div style="display: flex">
+      <!-- Formulir JSON -->
+      <form action="/validateAndSave" method="POST" id="jsonForm">
+        <textarea
+          name="jsonData"
+          id="jsonData"
+          rows="10"
+          cols="50"
+          placeholder="Masukkan JSON string"
+        ></textarea>
+        <br />
+        <button
+          style="margin: 20px; padding: 10px"
+          type="button"
+          onclick="validateJSON()"
+        >
+          Validate JSON
+        </button>
+        <button
+          style="margin: 20px; padding: 10px"
+          type="button"
+          onclick="clearForm()"
+        >
+          CLEAR
+        </button>
+        <br />
+      </form>
+
+      <!-- Container untuk menampilkan JSON schema -->
+      <div id="schemaContainer">
+        <h2>JSON Schema:</h2>
+        <pre id="schema"></pre>
+      </div>
+    </div>
 
     <div id="resultContainer">
       <h2>Hasil Respons:</h2>
@@ -54,6 +69,57 @@
     </div>
 
     <script>
+      const jsonSchema = {
+        type: "object",
+        properties: {
+          responseCode: {
+            type: "string",
+          },
+          responseMessage: {
+            type: "string",
+          },
+          referenceNo: {
+            type: "string",
+          },
+          partnerReferenceNo: {
+            type: "string",
+          },
+          additionalInfo: {
+            type: "object",
+            properties: {
+              amount: {
+                type: "string",
+              },
+              currency: {
+                type: "string",
+              },
+              merchantTrxId: {
+                type: "string",
+              },
+              remarks: {
+                type: "string",
+              },
+            },
+            required: ["amount", "currency", "merchantTrxId", "remarks"],
+          },
+        },
+        required: [
+          "responseCode",
+          "responseMessage",
+          "referenceNo",
+          "partnerReferenceNo",
+          "additionalInfo",
+        ],
+      };
+
+      // Fungsi untuk menampilkan JSON schema di halaman
+      function displaySchema() {
+        const schemaContainer = document.getElementById("schema");
+        schemaContainer.textContent = JSON.stringify(jsonSchema, null, 2);
+      }
+
+      // Panggil fungsi untuk menampilkan JSON schema saat halaman dimuat
+      window.onload = displaySchema;
       async function validateJSON() {
         const jsonData = document.getElementById("jsonData").value;
 
@@ -77,6 +143,10 @@
           } else {
             resultContainer.className = "error";
           }
+
+          // Menampilkan JSON schema
+          const schemaContainer = document.getElementById("schema");
+          schemaContainer.textContent = JSON.stringify(schemaMerchant, null, 2);
         } catch (error) {
           console.error("Error:", error);
         }
@@ -85,10 +155,12 @@
       function clearForm() {
         const jsonDataInput = document.getElementById("jsonData");
         const resultContainer = document.getElementById("result");
+        const schemaContainer = document.getElementById("schema");
 
         jsonDataInput.value = "";
         resultContainer.textContent = "";
         resultContainer.className = ""; // Hapus kelas background
+        schemaContainer.textContent = ""; // Hapus JSON schema
       }
     </script>
   </body>
