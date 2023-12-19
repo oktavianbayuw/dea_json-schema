@@ -1,12 +1,12 @@
 const db = require("../config/dbConfig");
 
 const checkRepository = {
-  saveLog: (urlPath, status) => {
+  saveLog: (urlPath, status, jsonSchema) => {
     return new Promise((resolve, reject) => {
       const query =
-        "INSERT INTO results (url_path, status, dt_insert, dt_modified) VALUES (?, ?, NOW(), NOW())";
+        "INSERT INTO results (url_path, status, dt_insert, dt_modified, json_schema) VALUES (?, ?, NOW(), NOW(), ?)";
 
-      db.query(query, [urlPath, status], (error, results) => {
+      db.query(query, [urlPath, status, jsonSchema], (error, results) => {
         if (error) {
           reject(error);
         } else {
@@ -20,31 +20,30 @@ const checkRepository = {
     return new Promise((resolve, reject) => {
       const dbStatus = newStatus ? 1 : 0;
 
-      const selectQuery = "SELECT * FROM results WHERE url_path = ?";
-      db.query(selectQuery, [urlPath], (selectError, selectResults) => {
-        if (selectError) {
-          reject(selectError);
-        } else {
-          if (selectResults.length > 0) {
-            const updateQuery =
-              "UPDATE results SET status = ?, dt_modified = NOW() WHERE url_path = ?";
-            db.query(
-              updateQuery,
-              [dbStatus, urlPath],
-              (updateError, updateResults) => {
-                if (updateError) {
-                  reject(updateError);
-                } else {
-                  resolve(updateResults);
-                }
-              }
-            );
+      const updateQuery =
+        "UPDATE results SET status = ?, dt_modified = NOW() WHERE url_path = ?";
+      db.query(
+        updateQuery,
+        [dbStatus, urlPath],
+        (updateError, updateResults) => {
+          if (updateError) {
+            reject(updateError);
           } else {
-            checkRepository
-              .saveLog(urlPath, newStatus)
-              .then(resolve)
-              .catch(reject);
+            resolve(updateResults);
           }
+        }
+      );
+    });
+  },
+
+  getDataByUrlPath: (urlPath) => {
+    return new Promise((resolve, reject) => {
+      const query = "SELECT * FROM results WHERE url_path = ?";
+      db.query(query, [urlPath], (error, results) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results[0]); // Mengembalikan data pertama (jika ada)
         }
       });
     });

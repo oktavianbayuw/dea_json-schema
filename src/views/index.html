@@ -27,21 +27,11 @@
       }
       /* Tambahkan gaya CSS untuk menampilkan JSON schema */
       #schemaContainer {
-              padding: 10px;
+        padding: 10px;
         border: 1px solid #ccc;
         max-width: 600px;
-        overflow: auto; /* Tambahkan properti overflow untuk membuatnya scrollable */
-        overflow-y: auto; /* Tambahkan properti overflow-y untuk scrollbar vertikal */
-        max-height: 300px; /* Sesuaikan dengan tinggi maksimum yang diinginkan */
+        overflow: auto;
         margin-top: 20px; /* Beri margin atas untuk memisahkan dari formulir */
-      }
-      .input-path{
-        margin-bottom: 20px;
-        width: 85%;
-      }
-      label, textarea{
-        margin-bottom: 20px;
-        width: 93%;
       }
     </style>
   </head>
@@ -50,17 +40,32 @@
     <div id="container">
       <!-- Formulir JSON -->
       <div id="leftContainer">
-        <form action="/validateAndSave" method="POST" id="jsonForm">
-          <label>Path : </label>
-          <input class="input-path" type="text" name="path" id="path" placeholder="Masukkan path json anda!">
-          <br>
-            <label>JSON Response :</label>
+        <form action="/merchant/validateAndSave" method="POST" id="jsonForm">
+          <label for="urlPath">URL Path:</label>
+          <input
+            type="text"
+            name="url_path"
+            id="urlPath"
+            placeholder="Enter URL Path"
+            style="margin-bottom: 10px"
+          />
+          <br />
+          <label for="jsonData">JSON Data:</label>
           <textarea
             name="jsonData"
             id="jsonData"
             rows="10"
-            cols="8"
-            placeholder="Masukkan JSON string"
+            cols="75"
+            placeholder="Enter JSON string"
+          ></textarea>
+          <label for="jsonSchema">JSON Schema:</label>
+          <textarea
+            name="jsonSchema"
+            id="jsonSchema"
+            rows="10"
+            style="margin-top: 10px"
+            cols="75"
+            placeholder="Enter JSON Schema"
           ></textarea>
           <br />
           <button
@@ -77,98 +82,39 @@
           >
             CLEAR
           </button>
-          <button
-          style="margin: 20px; padding: 10px"
-          type="button"
-          onclick="convertToSchema()"
-        >
-          Input and Display Schema
-        </button>
         </form>
 
-          <!-- Container untuk menampilkan hasil respons -->
-        <div id="rightContainer">
-          <div id="resultContainer">
-            <h2>Hasil Respons:</h2>
-            <pre id="result"></pre>
-          </div>
+        <!-- Container untuk menampilkan JSON schema -->
+        <div id="schemaContainer">
+          <h2>JSON Schema yang Tersedia Di Simulasi Ini :</h2>
+          <pre id="schema"></pre>
         </div>
       </div>
 
-       <!-- Container untuk menampilkan JSON schema -->
-       <div id="schemaContainer">
-        <h2>JSON Schema yang Tersedia Di Simulasi Ini :</h2>
-        <pre id="schema"></pre>
+      <!-- Container untuk menampilkan hasil respons -->
+      <div id="rightContainer">
+        <div id="resultContainer">
+          <h2>Hasil Respons:</h2>
+          <pre id="result"></pre>
+        </div>
       </div>
     </div>
 
     <script>
-      
-      // JSON schema yang akan ditampilkan
-      const jsonSchema = document.getElementById("jsonSchema");
-      function convertToSchema(jsonObject, parentKey = "") {
-        const result = {
-          type: "object",
-          properties: {},
-          required: [],
-        };
-
-        for (const key in jsonObject) {
-          const fullPath = parentKey ? `${parentKey}.${key}` : key;
-
-          if (jsonObject[key] && typeof jsonObject[key] === "object" && !Array.isArray(jsonObject[key])) {
-            // Recursive call for nested objects
-            result.properties[key] = convertToSchema(jsonObject[key], fullPath);
-            if (result.properties[key].required && result.properties[key].required.length > 0) {
-              result.required.push(key);
-            }
-          } else {
-            // Handle primitive types
-            result.properties[key] = { type: typeof jsonObject[key] };
-            if (jsonObject[key] !== null) {
-              result.required.push(key);
-            }
-          }
-        }
-
-        return result;
-        console.log(result);
+      // Fungsi untuk menampilkan JSON schema di halaman
+      function displaySchema() {
+        const schemaContainer = document.getElementById("schema");
+        schemaContainer.textContent = JSON.stringify(jsonSchema, null, 2);
       }
 
-      function inputAndDisplaySchema() {
-        // Ambil nilai JSON Response dari textarea
-        const jsonResponseInput = document.getElementById("jsonData").value;
+      // Panggil fungsi untuk menampilkan JSON schema saat halaman dimuat
+      window.onload = displaySchema;
 
-        try {
-          // Parse JSON Response menjadi objek JavaScript
-          const jsonObject = JSON.parse(jsonResponseInput);
-
-          // Konversi objek JSON menjadi JSON Schema
-          const jsonSchema = convertToSchema(jsonObject);
-
-          // Tampilkan JSON Schema di dalam elemen <pre>
-          const jsonSchemaContainer = document.getElementById("schema");
-          jsonSchemaContainer.textContent = JSON.stringify(jsonSchema, null, 2);
-        } catch (error) {
-          console.error("Error parsing JSON response:", error);
-        }
-      }
-
-    // Fungsi untuk menampilkan JSON schema di halaman
-    function displaySchema() {
-      const schemaContainer = document.getElementById("schema");
-      const jsonSchemaInput = document.getElementById("jsonSchema");
-
-      // Dapatkan nilai dari textarea
-      const jsonSchemaValue = jsonSchemaInput.value;
-
-      // Tampilkan nilai JSON Schema di container
-      schemaContainer.textContent = jsonSchemaValue;
-      console.log(jsonSchemaValue);
-    }
       // ... (sisa kode JavaScript Anda)
       async function validateJSON() {
+        const urlPath = document.getElementById("urlPath").value;
         const jsonData = document.getElementById("jsonData").value;
+        const jsonSchema = document.getElementById("jsonSchema").value;
 
         try {
           const response = await fetch("/merchant/validateAndSave", {
@@ -176,13 +122,17 @@
             headers: {
               "Content-Type": "application/json",
             },
-            body: jsonData,
+            body: JSON.stringify({
+              url_path: urlPath,
+              jsonData: jsonData,
+              jsonSchema: jsonSchema,
+            }),
           });
 
           const result = await response.json();
 
           const resultContainer = document.getElementById("result");
-          resultContainer.textContent = JSON.stringify(result, null, 2);
+          resultContainer.textContent = result;
 
           // Tambahkan logika untuk mengubah warna latar belakang
           if (result.status === true) {
@@ -192,21 +142,19 @@
           }
           // Menampilkan JSON schema
           const schemaContainer = document.getElementById("schema");
-          schemaContainer.textContent = JSON.stringify(schemaMerchant, null, 2);
+          schemaContainer.textContent = jsonSchema;
         } catch (error) {
           console.error("Error:", error);
         }
       }
       function clearForm() {
-        const pathInput = document.getElementById("path");
+        const urlPathInput = document.getElementById("urlPath");
         const jsonDataInput = document.getElementById("jsonData");
-        const jsonSchemaInput = document.getElementById("jsonSchema");
         const resultContainer = document.getElementById("result");
         const schemaContainer = document.getElementById("schema");
 
-        pathInput.value = "";
+        urlPathInput.value = "";
         jsonDataInput.value = "";
-        jsonSchemaInput.value = "";
         resultContainer.textContent = "";
         resultContainer.className = ""; // Hapus kelas background
         schemaContainer.textContent = ""; // Hapus JSON schema
